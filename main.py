@@ -2,8 +2,6 @@ import asyncio
 import logging
 import aiosqlite
 import math
-from os import getenv
-from dotenv import load_dotenv
 
 from aiogram import Bot, Dispatcher, Router, F, types
 from aiogram.enums import ParseMode
@@ -18,7 +16,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardBut
 
 load_dotenv()
 # ==================== 1. SOZLAMALAR (CONFIG) ====================
-API_TOKEN = getenv("8041760588:AAFLJi1Lg7Oo_1JE5bHsRrUO6k-vp-EWa9w")
+API_TOKEN ="8041760588:AAFLJi1Lg7Oo_1JE5bHsRrUO6k-vp-EWa9w"
 SUPER_ADMIN = 8488028783
 DB_NAME = "shop.db"
 
