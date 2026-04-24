@@ -18,7 +18,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardBut
 
 load_dotenv()
 # ==================== 1. SOZLAMALAR (CONFIG) ====================
-API_TOKEN = getenv("TOKEN")
+API_TOKEN = getenv("8041760588:AAFLJi1Lg7Oo_1JE5bHsRrUO6k-vp-EWa9w")
 SUPER_ADMIN = 8488028783
 DB_NAME = "shop.db"
 
