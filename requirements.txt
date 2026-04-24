@@ -1,4 +1,4 @@
+python-dotenv
 aiogram>=3.0
 aiosqlite
 aiohttp
-python-dotenv
