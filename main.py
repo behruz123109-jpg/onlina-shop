@@ -17,7 +17,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardBut
 # ═══════════════════════════════════════════════════════════════════════
 #  SOZLAMALAR
 # ═══════════════════════════════════════════════════════════════════════
-API_TOKEN   = "8786619849:AAHVq8hvDyfKHjg9g2URAOQ27_4aFnc_Zdo"
+API_TOKEN   = "8747604242:AAFj9oSG5txNx1Pw7UfCAc9WH_Em8tB73p0"
 SUPER_ADMIN = 8488028783
 DB_NAME     = "shop.db"
 
