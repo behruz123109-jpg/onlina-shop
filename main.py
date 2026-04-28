@@ -23,7 +23,7 @@ load_dotenv()
 # ──────────────────────────────────────────
 # SOZLAMALAR
 # ──────────────────────────────────────────
-BOT_TOKEN = "8747604242:AAFj9oSG5txNx1Pw7UfCAc9WH_Em8tB73p0"
+BOT_TOKEN = ""
 ADMIN_IDS = [8488028783]
 DB_PATH = "shop.db"
 
