@@ -223,16 +223,10 @@ async def build_cart_msg(user_id: int):
 # ──────────────────────────────────────────
 # GLOBAL BEKOR QILISH
 # ──────────────────────────────────────────
-@router.message(F.text == "❌ Bekor qilish")
+@router.message(F.text == "❌ Bekor qilish", StateFilter("*"))
 async def global_cancel(msg: Message, state: FSMContext):
-    await state.clear()
-    await msg.answer("🚫 Amal bekor qilindi.", reply_markup=await main_kb(msg.from_user.id))
-
-
-@router.message(F.text == "🔙 Asosiy menyu")
+@router.message(F.text == "🔙 Asosiy menyu", StateFilter("*"))
 async def go_home(msg: Message, state: FSMContext):
-    await state.clear()
-    await msg.answer("🏠 Asosiy menyu", reply_markup=await main_kb(msg.from_user.id))
 
 
 # ──────────────────────────────────────────
@@ -1250,12 +1244,17 @@ async def check_admin(id):
     pass
 
 
-@router.message()
+@router.message(StateFilter("*"))
 async def catch_all(msg: Message, state: FSMContext):
     st = await state.get_state()
     if st is None:
         kb = admin_kb() if await check_admin(msg.from_user.id) else await main_kb(msg.from_user.id)
-        await msg.answer("❓ Tushunmadim. Menyudan foydalaning:", reply_markup=kb)
+        await msg.answer("👇 Iltimos, pastdagi menyu tugmalaridan foydalaning:", reply_markup=kb)
+    else:
+        await msg.answer(
+            "⚠️ <b>Iltimos, kutilayotgan ma'lumotni to'g'ri kiriting!</b>\n"
+            "<i>(Yoki jarayonni bekor qilish uchun pastdagi <b>❌ Bekor qilish</b> tugmasini bosing).</i>"
+        )
 
 
 async def main():
