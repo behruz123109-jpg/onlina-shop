@@ -225,19 +225,22 @@ async def build_cart_msg(user_id: int):
 # ──────────────────────────────────────────
 @router.message(F.text == "❌ Bekor qilish", StateFilter("*"))
 async def global_cancel(msg: Message, state: FSMContext):
+    await state.clear()
+    await msg.answer("🚫 Amal bekor qilindi.", reply_markup=await main_kb(msg.from_user.id))
+
 @router.message(F.text == "🔙 Asosiy menyu", StateFilter("*"))
 async def go_home(msg: Message, state: FSMContext):
-
+    await state.clear()
+    await msg.answer("🏠 Asosiy menyu", reply_markup=await main_kb(msg.from_user.id))
 
 # ──────────────────────────────────────────
 # 1. MIJOZ: START, PROFIL, YORDAM
 # ──────────────────────────────────────────
-@router.message(CommandStart())
+@router.message(CommandStart(), StateFilter("*"))
 async def cmd_start(msg: Message, state: FSMContext):
     await state.clear()
     u = await q1("SELECT * FROM users WHERE tg_id=?", (msg.from_user.id,))
     if u and u['is_blocked']: return await msg.answer("❌ Hisobingiz bloklangan.")
-
     if not u:
         await msg.answer("👋 Xush kelibsiz! Ismingizni yozing:", reply_markup=ReplyKeyboardRemove())
         await state.set_state(Reg.name)
