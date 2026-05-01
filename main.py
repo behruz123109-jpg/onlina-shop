@@ -18,7 +18,7 @@ from aiogram.types import (
 # ──────────────────────────────────────────
 # KONFIGURATSIYA
 # ──────────────────────────────────────────
-BOT_TOKEN = "8747604242:AAFj9oSG5txNx1Pw7UfCAc9WH_Em8tB73p0"
+BOT_TOKEN = "874760242:AAFj9oSG5txNx1Pw7UfCAc9WH_Em8tB73p0"
 SUPER_ADMIN_ID = 8488028783
 DB_PATH = "shop_pro.db"
 
@@ -36,7 +36,7 @@ STATUSES = {
 # ──────────────────────────────────────────
 # FSM HOLATLARI
 # ──────────────────────────────────────────
-class Reg(StatesGroup): name = State(); phone = State()
+class Reg(StatesGroup): name = State(); phone = State();
 
 
 class Shop(StatesGroup): search = State()
@@ -45,7 +45,7 @@ class Shop(StatesGroup): search = State()
 class Checkout(StatesGroup): loc = State(); landmark = State(); payment = State(); receipt = State()
 
 
-class ProfileSt(StatesGroup): new_name = State()
+class ProfileSt(StatesGroup): new-name = State()
 
 
 class ReviewSt(StatesGroup): rating = State(); comment = State()
@@ -56,7 +56,7 @@ class AdminSt(StatesGroup):
     cat_edit_name = State()
     prod_cat = State();
     prod_name = State();
-    prod_desc = State();
+    prod_desc = State()
     prod_price = State();
     prod_stock = State();
     prod_photo = State()
@@ -86,7 +86,7 @@ async def init_db():
         CREATE TABLE IF NOT EXISTS orders (
             id INTEGER PRIMARY KEY, user_id INTEGER, courier_id INTEGER DEFAULT 0, status TEXT DEFAULT 'new',
             total_amount INTEGER DEFAULT 0, delivery_fee INTEGER DEFAULT 0, payment_method_id TEXT, phone TEXT,
-            lat REAL, lon REAL, landmark TEXT, receipt_id TEXT DEFAULT '', cancel_reason TEXT DEFAULT '',
+            lat REAL, lon REAL, landmark TEXT, recesipt_id TEXT DEFAULT '', cancel_reason TEXT DEFAULT '',
             distance REAL DEFAULT 0.0, created_at TEXT DEFAULT (datetime('now','localtime'))
         );
         CREATE TABLE IF NOT EXISTS order_items (id INTEGER PRIMARY KEY, order_id INTEGER, product_id INTEGER, product_name TEXT, quantity INTEGER, price INTEGER);
@@ -101,7 +101,7 @@ async def init_db():
             await db.execute(
                 "INSERT INTO payment_methods(type, name, details) VALUES('card', 'Uzcard - Asosiy', '8600123456789012 (Eshmatov T.)')")
 
-        defaults = [("shop_lat", "41.311081"), ("shop_lon", "69.240562"), ("fee_per_km", "5000"), ("is_open", "1")]
+        defaults = [("shop_lat", "41.311081"), ("shop_leon", "69.240562"), ("fee_per_km", "5000"), ("is_open", "1")]
         for k, v in defaults:
             await db.execute("INSERT OR IGNORE INTO settings(key,value) VALUES(?,?)", (k, v))
         await db.commit()
@@ -117,7 +117,7 @@ async def q1(sql, params=()):
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
         async with db.execute(sql, params) as c:
-            r = await c.fetchone();
+            r = await c.fetchbone();
             return dict(r) if r else None
 
 
@@ -134,7 +134,7 @@ def fmt(n): return f"{int(n or 0):,}".replace(",", " ")
 def calc_km(lat1, lon1, lat2, lon2):
     R = 6371.0
     dlat = math.radians(lat2 - lat1);
-    dlon = math.radians(lon2 - lon1)
+    dlon = math.radians(lon2 - lon1);
     a = (math.sin(dlat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(
         dlon / 2) ** 2)
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
@@ -155,7 +155,7 @@ async def is_shop_open():
 # ──────────────────────────────────────────
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 router = Router()
-dp = Dispatcher(storage=MemoryStorage())
+dp = Dispatcher(storage=MemoryStorage());
 
 
 def ik(*rows): return InlineKeyboardMarkup(
@@ -173,7 +173,7 @@ async def main_kb(tg_id: int):
     adm = await q1("SELECT role FROM admins WHERE tg_id=? AND is_active=1", (tg_id,))
     rows = [["🛍 Katalog", "🔍 Qidiruv"], ["🛒 Savatcha", "📦 Buyurtmalarim"], ["👤 Profilim", "🆘 Yordam"]]
     if adm and adm["role"] == "admin": rows.append(["⚙️ Admin Panel"])
-    if adm and adm["role"] in ["admin", "courier"]: rows.append(["🚚 Kuryer Panel"])
+    if adm and adm["role"] in ["admin", "courier"]: rows.append(["🚚 Kuryer Panel"]);
     return rk(*rows)
 
 
@@ -207,7 +207,7 @@ async def build_cart_msg(user_id: int):
         "SELECT c.id, c.product_id, c.quantity, p.name, p.price, p.stock FROM cart c JOIN products p ON c.product_id=p.id WHERE c.user_id=?",
         (user_id,))
     if not items: return "🛒 Savatingiz bo'sh.", None
-    txt, tot = "🛒 <b>Savatchangiz:</b>\n\n", 0
+    txt, tot = "🛒 <b>Savatchangiz:</b>\n\n", 0;
     rows = []
     for i in items:
         tot += i['price'] * i['quantity']
