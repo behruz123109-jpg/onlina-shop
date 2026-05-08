@@ -17,7 +17,7 @@ from aiogram.types import (
 # ──────────────────────────────────────────
 # ⚙️ KONFIGURATSIYA (O'zingizning havolalarni qo'ying)
 # ──────────────────────────────────────────
-BOT_TOKEN = "874760242:AAFj9oSG5txNx1Pw7UfCAc9WH_Em8tB73p0"
+BOT_TOKEN = "8450603891:AAEeq6Hk0YDjsrzY70JX1CgSMgJLiPbcJ5E"
 ADMINS = [8488028783, 5589465402]  # Ikkala ID ham admin bo'ladi
 
 # Railway'dan olingan PostgreSQL va Redis havolalari
