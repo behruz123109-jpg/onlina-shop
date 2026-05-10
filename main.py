@@ -714,13 +714,31 @@ async def set_shop_loc_save(msg: Message, state: FSMContext):
     await state.clear()
     await msg.answer("✅ Do'kon lokatsiyasi muvaffaqiyatli yangilandi!", reply_markup=admin_kb())
 
+# O'RNIGA MANA BUNI QO'YING:
 @router.message(F.text == "👥 Xodimlar")
 async def admin_staff(msg: Message):
     if not await q1("SELECT 1 FROM admins WHERE tg_id=? AND role='admin'", (msg.from_user.id,)): return
     stf = await qall("SELECT * FROM admins")
-    txt = "👥 <b>Xodimlar:</b>\n\n"
-    for s in stf: txt += f"{'👑 Admin' if s['role'] == 'admin' else '🚚 Kuryer'} | <code>{s['tg_id']}</code> | {s['name']}\n"
-    await msg.answer(txt, reply_markup=ik([("➕ Kuryer qo'shish", "add_cour")], [("➕ Admin qo'shish", "add_adm")]))
+    btns = []
+    for s in stf:
+        role = '👑 Admin' if s['role'] == 'admin' else '🚚 Kuryer'
+        # O'zingizni (Asosiy adminni) adashib o'chirib yubormaslik uchun himoya:
+        if s['tg_id'] != 8488028783:  
+            btns.append([(f"❌ {s['name']} ({role})", f"delstf_{s['id']}")])
+        else:
+            btns.append([(f"🔒 {s['name']} (Siz - Asosiy)", "noop")])
+            
+    btns.append([("➕ Kuryer qo'shish", "add_cour")])
+    btns.append([("➕ Admin qo'shish", "add_adm")])
+    await msg.answer("👥 <b>Xodimlar (O'chirish uchun ustiga bosing):</b>", reply_markup=ik(*btns))
+
+# BU XODIMNI BAZADAN O'CHIRIB TASHLOVCHI YANGI FUNKSIYA:
+@router.callback_query(F.data.startswith("delstf_"))
+async def delete_staff(call: CallbackQuery):
+    stf_id = int(call.data[7:])
+    await exe("DELETE FROM admins WHERE id=?", (stf_id,))
+    await call.message.edit_text("✅ Xodim bazadan muvaffaqiyatli o'chirildi!")
+    await call.answer("O'chirildi")
 
 @router.callback_query(F.data.in_(["add_cour", "add_adm"]))
 async def add_staff(call: CallbackQuery, state: FSMContext):
