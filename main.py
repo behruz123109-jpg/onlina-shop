@@ -747,15 +747,23 @@ async def add_staff(call: CallbackQuery, state: FSMContext):
     await call.message.answer(f"🆔 Yangi xodimning Telegram ID sini kiriting:", reply_markup=CANCEL_KB)
     await state.set_state(AdminSt.admin_add)
     await call.answer()
+# 2. PROFIL ISMINI SAQLASH QISMINI SHUNGA ALMASHTIRING:
+@router.callback_query(F.data == "force_name_set")
+async def ask_staff_name(call: CallbackQuery, state: FSMContext):
+    await call.message.answer("✏️ Iltimos, ism-familiyangizni yozing:")
+    await state.set_state(ProfileSt.new_name)
+    await call.answer()
 
-@router.message(AdminSt.admin_add)
-async def save_staff(msg: Message, state: FSMContext):
-    if not msg.text.isdigit(): return await msg.answer("Faqat raqam!")
-    d = await state.get_data(); role = d['staff_role']
-    name = "Kuryer" if role == "courier" else "Admin"
-    await exe("INSERT INTO admins(tg_id,name,role) VALUES(?,?,?) ON CONFLICT (tg_id) DO NOTHING", (int(msg.text), name, role))
+@router.message(ProfileSt.new_name)
+async def save_name(msg: Message, state: FSMContext):
+    yangi_ism = msg.text.strip()
+    # Mijozlar bazasida ismni yangilash
+    await exe("UPDATE users SET name=? WHERE tg_id=?", (yangi_ism, msg.from_user.id))
+    # Agar xodim/admin bo'lsa, xodimlar bazasida ham yangilash
+    await exe("UPDATE admins SET name=? WHERE tg_id=?", (yangi_ism, msg.from_user.id))
+    
     await state.clear()
-    await msg.answer("✅ Xodim qo'shildi!", reply_markup=admin_kb())
+    await msg.answer("✅ Ismingiz tizimga saqlandi! Endi menyudan bemalol foydalanishingiz mumkin.", reply_markup=await main_kb(msg.from_user.id))
 
 @router.message(F.text == "🚫 Ban/Unban")
 async def admin_ban_menu(msg: Message, state: FSMContext):
