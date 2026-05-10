@@ -17,8 +17,8 @@ from aiogram.types import (
 # ──────────────────────────────────────────
 # ⚙️ KONFIGURATSIYA (O'zingizning havolalarni qo'ying)
 # ──────────────────────────────────────────
-BOT_TOKEN = "8450603891:AAEeq6Hk0YDjsrzY70JX1CgSMgJLiPbcJ5E"
-ADMINS = [8488028783, 5589465402]  # Ikkala ID ham admin bo'ladi
+BOT_TOKEN = "8747604242:AAEyzcOcHOM5fPwBVRK4pl46T2EIGfaG5n4"
+ADMINS = [8488028783]  # Ikkala ID ham admin bo'ladi
 
 # Railway'dan olingan PostgreSQL va Redis havolalari
 DB_URL = "postgresql://neondb_owner:npg_93widXgyhepO@ep-dawn-resonance-aq5a93o7-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require"
