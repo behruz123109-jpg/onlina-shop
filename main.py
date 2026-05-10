@@ -15,12 +15,11 @@ from aiogram.types import (
 )
 
 # ──────────────────────────────────────────
-# ⚙️ KONFIGURATSIYA (O'zingizning havolalarni qo'ying)
+# ⚙️ KONFIGURATSIYA
 # ──────────────────────────────────────────
 BOT_TOKEN = "8747604242:AAEyzcOcHOM5fPwBVRK4pl46T2EIGfaG5n4"
-ADMINS = [8488028783]  # Ikkala ID ham admin bo'ladi
+ADMINS = [8488028783]  # Asosiy admin
 
-# Railway'dan olingan PostgreSQL va Redis havolalari
 DB_URL = "postgresql://neondb_owner:npg_93widXgyhepO@ep-dawn-resonance-aq5a93o7-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require"
 REDIS_URL = "rediss://default:gQAAAAAAAcNWAAIgcDFlNzVhMWM5NDU1ODE0NmI4YjY3Y2M1NDI4ZGViZjEyMQ@busy-emu-115542.upstash.io:6379"
 
@@ -40,22 +39,21 @@ STATUSES = {
 class Reg(StatesGroup): name = State(); phone = State()
 class Shop(StatesGroup): search = State()
 class Checkout(StatesGroup): loc = State(); landmark = State(); payment = State(); receipt = State()
-class ProfileSt(StatesGroup): new_name = State()  # Xato chiziqcha to'g'rilandi
+class ProfileSt(StatesGroup): new_name = State()
 class ReviewSt(StatesGroup): rating = State(); comment = State()
 class AdminSt(StatesGroup):
     cat_name = State(); cat_edit_name = State()
     prod_cat = State(); prod_name = State(); prod_desc = State()
     prod_price = State(); prod_stock = State(); prod_photo = State()
     admin_add = State(); pay_name = State(); pay_details = State()
-    set_fee = State(); custom_msg = State()  # Mijozga yozish state'i
+    set_fee = State(); custom_msg = State()
     ban_user = State(); bcast_msg = State(); set_loc = State()
 
 # ──────────────────────────────────────────
-# 🗄 POSTGRESQL BAZA VA YORDAMCHILAR (ASYNCPG)
+# 🗄 POSTGRESQL BAZA
 # ──────────────────────────────────────────
 pool = None
 
-# Barcha SQLite '?' belgilarini PostgreSQL '$1, $2' ga o'tkazib beruvchi aqlli filtr
 def prep_sql(sql: str) -> str:
     parts = sql.split('?')
     return "".join([parts[i] + (f"${i+1}" if i < len(parts)-1 else "") for i in range(len(parts))])
@@ -99,7 +97,7 @@ async def exe(sql, params=()):
 
 async def q1(sql, params=()):
     async with pool.acquire() as db:
-        r = await db.fetchrow(prep_sql(sql), *params)  # fetchbone xatosi yo'q qilindi
+        r = await db.fetchrow(prep_sql(sql), *params)
         return dict(r) if r else None
 
 async def qall(sql, params=()):
@@ -128,7 +126,7 @@ async def check_admin(user_id: int):
     return bool(adm)
 
 # ──────────────────────────────────────────
-# 🤖 BOT VA KLAVIATURALAR (Redis Bilan)
+# 🤖 BOT VA KLAVIATURALAR
 # ──────────────────────────────────────────
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 router = Router()
@@ -147,7 +145,14 @@ async def main_kb(tg_id: int):
     return rk(*rows)
 
 def admin_kb():
-    return rk(["📂 Bo'limlar", "📦 Mahsulotlar"], ["💳 To'lov usullari", "👥 Xodimlar"], ["🚫 Ban/Unban", "📊 Statistika"], ["⚙️ Sozlamalar", "📨 Broadcast"], ["🔙 Asosiy menyu"])
+    # Mijozlar menyusi qo'shildi!
+    return rk(
+        ["📂 Bo'limlar", "📦 Mahsulotlar"], 
+        ["💳 To'lov usullari", "👥 Xodimlar"], 
+        ["👥 Mijozlar", "🚫 Ban/Unban"], 
+        ["📊 Statistika", "⚙️ Sozlamalar"], 
+        ["📨 Broadcast", "🔙 Asosiy menyu"]
+    )
 
 def courier_kb():
     return rk(["📋 Kuryer: Mening buyurtmalarim", "🔙 Asosiy menyu"])
@@ -231,9 +236,11 @@ async def edit_name(call: CallbackQuery, state: FSMContext):
 
 @router.message(ProfileSt.new_name)
 async def save_name(msg: Message, state: FSMContext):
-    await exe("UPDATE users SET name=? WHERE tg_id=?", (msg.text.strip(), msg.from_user.id))
+    yangi_ism = msg.text.strip()
+    await exe("UPDATE users SET name=? WHERE tg_id=?", (yangi_ism, msg.from_user.id))
+    await exe("UPDATE admins SET name=? WHERE tg_id=?", (yangi_ism, msg.from_user.id))
     await state.clear()
-    await msg.answer("✅ Saqlandi!", reply_markup=await main_kb(msg.from_user.id))
+    await msg.answer("✅ Ismingiz tizimga saqlandi! Endi menyudan bemalol foydalanishingiz mumkin.", reply_markup=await main_kb(msg.from_user.id))
 
 @router.message(F.text == "🆘 Yordam")
 async def cmd_help(msg: Message):
@@ -350,7 +357,8 @@ async def cart_clear(call: CallbackQuery):
     await exe("DELETE FROM cart WHERE user_id=?", (call.from_user.id,))
     await call.message.edit_text("🛒 Savat tozalandi.")
     await call.answer()
-    # ──────────────────────────────────────────
+
+# ──────────────────────────────────────────
 # 🚀 3. ZAKAZ BERISH (CHECKOUT)
 # ──────────────────────────────────────────
 @router.callback_query(F.data == "checkout")
@@ -461,14 +469,14 @@ async def finalize_order(msg, state, uid, pay_name, tot, lat, lon, landmark, ite
             btns = ik(
                 [("💰 Yo'lkira kiritish", f"asetfee_{oid}")], 
                 [("❌ Rad etish", f"acancel_{oid}")],
-                [("💬 Mijozga xabar yozish", f"admmsg_{uid}")]  # YANGILIK: Mijozga shaxsiy xabar yozish
+                [("💬 Mijozga xabar yozish", f"admmsg_{uid}")] 
             )
             if receipt_id: await bot.send_photo(a["tg_id"], receipt_id, caption=adm_txt, reply_markup=btns)
             else: await bot.send_message(a["tg_id"], adm_txt, reply_markup=btns)
         except: pass
 
 # ──────────────────────────────────────────
-# 💬 4. ADMIN SHAXSIY XABAR FUNKSIYASI (Direct Message)
+# 💬 4. ADMIN SHAXSIY XABAR FUNKSIYASI
 # ──────────────────────────────────────────
 @router.callback_query(F.data.startswith("admmsg_"))
 async def adm_direct_msg_start(call: CallbackQuery, state: FSMContext):
@@ -546,7 +554,7 @@ async def urev_skip(call: CallbackQuery, state: FSMContext):
     await call.answer()
 
 # ──────────────────────────────────────────
-# 🛠 6. KURYER VA ADMIN CRUD (Asl nusxasi)
+# 🛠 6. KURYER VA ADMIN CRUD
 # ──────────────────────────────────────────
 @router.message(F.text == "🚚 Kuryer Panel")
 async def cmd_courier(msg: Message):
@@ -714,7 +722,6 @@ async def set_shop_loc_save(msg: Message, state: FSMContext):
     await state.clear()
     await msg.answer("✅ Do'kon lokatsiyasi muvaffaqiyatli yangilandi!", reply_markup=admin_kb())
 
-# O'RNIGA MANA BUNI QO'YING:
 @router.message(F.text == "👥 Xodimlar")
 async def admin_staff(msg: Message):
     if not await q1("SELECT 1 FROM admins WHERE tg_id=? AND role='admin'", (msg.from_user.id,)): return
@@ -722,7 +729,6 @@ async def admin_staff(msg: Message):
     btns = []
     for s in stf:
         role = '👑 Admin' if s['role'] == 'admin' else '🚚 Kuryer'
-        # O'zingizni (Asosiy adminni) adashib o'chirib yubormaslik uchun himoya:
         if s['tg_id'] != 8488028783:  
             btns.append([(f"❌ {s['name']} ({role})", f"delstf_{s['id']}")])
         else:
@@ -732,7 +738,6 @@ async def admin_staff(msg: Message):
     btns.append([("➕ Admin qo'shish", "add_adm")])
     await msg.answer("👥 <b>Xodimlar (O'chirish uchun ustiga bosing):</b>", reply_markup=ik(*btns))
 
-# BU XODIMNI BAZADAN O'CHIRIB TASHLOVCHI YANGI FUNKSIYA:
 @router.callback_query(F.data.startswith("delstf_"))
 async def delete_staff(call: CallbackQuery):
     stf_id = int(call.data[7:])
@@ -747,28 +752,47 @@ async def add_staff(call: CallbackQuery, state: FSMContext):
     await call.message.answer(f"🆔 Yangi xodimning Telegram ID sini kiriting:", reply_markup=CANCEL_KB)
     await state.set_state(AdminSt.admin_add)
     await call.answer()
-# 2. PROFIL ISMINI SAQLASH QISMINI SHUNGA ALMASHTIRING:
+
+@router.message(AdminSt.admin_add)
+async def save_staff(msg: Message, state: FSMContext):
+    if not msg.text.isdigit(): return await msg.answer("Faqat raqam!")
+    tg_id = int(msg.text)
+    d = await state.get_data(); role = d['staff_role']
+    role_uz = "Kuryer" if role == "courier" else "Admin"
+    
+    await exe("INSERT INTO admins(tg_id,name,role) VALUES(?,?,?) ON CONFLICT (tg_id) DO NOTHING", (tg_id, f"{role_uz} (Ism kutilmoqda...)", role))
+    await state.clear()
+    await msg.answer(f"✅ {role_uz} qo'shildi! Unga ismini kiritishi uchun xabar yubordim.", reply_markup=admin_kb())
+    
+    try:
+        await bot.send_message(tg_id, f"🎉 <b>Tabriklaymiz!</b> Siz do'konga <b>{role_uz}</b> etib tayinlandingiz!\n\n👇 Iltimos, ma'muriyat sizni tanib olishi uchun pastdagi tugmani bosib o'z ismingizni kiriting:", reply_markup=ik([("✍️ Ismni kiritish", "force_name_set")]))
+    except Exception:
+        pass
+
 @router.callback_query(F.data == "force_name_set")
 async def ask_staff_name(call: CallbackQuery, state: FSMContext):
     await call.message.answer("✏️ Iltimos, ism-familiyangizni yozing:")
     await state.set_state(ProfileSt.new_name)
     await call.answer()
 
-@router.message(ProfileSt.new_name)
-async def save_name(msg: Message, state: FSMContext):
-    yangi_ism = msg.text.strip()
-    # Mijozlar bazasida ismni yangilash
-    await exe("UPDATE users SET name=? WHERE tg_id=?", (yangi_ism, msg.from_user.id))
-    # Agar xodim/admin bo'lsa, xodimlar bazasida ham yangilash
-    await exe("UPDATE admins SET name=? WHERE tg_id=?", (yangi_ism, msg.from_user.id))
+# ✨ YANGI FUNKSIYA: MIJOZLAR RO'YXATI ✨
+@router.message(F.text == "👥 Mijozlar")
+async def admin_users_list(msg: Message):
+    if not await q1("SELECT 1 FROM admins WHERE tg_id=? AND role='admin'", (msg.from_user.id,)): return
+    users = await qall("SELECT name, tg_id, phone, is_blocked FROM users ORDER BY id DESC LIMIT 50")
+    if not users: return await msg.answer("Mijozlar hozircha yo'q.")
     
-    await state.clear()
-    await msg.answer("✅ Ismingiz tizimga saqlandi! Endi menyudan bemalol foydalanishingiz mumkin.", reply_markup=await main_kb(msg.from_user.id))
+    txt = "👥 <b>Oxirgi 50 ta mijoz ro'yxati:</b>\n<i>(ID raqamini nusxalash uchun ustiga bosing)</i>\n\n"
+    for u in users:
+        status = "🚫 BAN" if u['is_blocked'] else "✅ Faol"
+        txt += f"👤 {u['name']} | 📱 {u['phone']}\n🆔 <code>{u['tg_id']}</code> | {status}\n\n"
+    
+    await msg.answer(txt)
 
 @router.message(F.text == "🚫 Ban/Unban")
 async def admin_ban_menu(msg: Message, state: FSMContext):
     if not await q1("SELECT 1 FROM admins WHERE tg_id=? AND role='admin'", (msg.from_user.id,)): return
-    await msg.answer("🚫 Bloklash yoki ochish uchun Mijozning Telegram ID sini yozing:", reply_markup=CANCEL_KB)
+    await msg.answer("🚫 Bloklash yoki ochish uchun Mijozning Telegram ID sini yozing:\n<i>(ID ni '👥 Mijozlar' bo'limidan nusxalashingiz mumkin)</i>", reply_markup=CANCEL_KB)
     await state.set_state(AdminSt.ban_user)
 
 @router.message(AdminSt.ban_user)
@@ -994,6 +1018,7 @@ async def send_bcast(msg: Message, state: FSMContext):
 @router.callback_query(F.data == "noop")
 async def noop_cb(call: CallbackQuery): await call.answer()
 
+# 👇 DARVOZABON ENG OXIRIDA 👇
 @router.message(StateFilter("*"))
 async def catch_all(msg: Message, state: FSMContext):
     st = await state.get_state()
