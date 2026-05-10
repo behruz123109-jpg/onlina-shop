@@ -526,10 +526,17 @@ async def ucancel(call: CallbackQuery):
 
 @router.callback_query(F.data.startswith("ureview_"))
 async def ureview(call: CallbackQuery, state: FSMContext):
-    await state.update_data(rev_oid=int(call.data[8:]))
+    oid = int(call.data[8:])
+    await state.update_data(rev_oid=oid)
     await call.message.edit_text("⭐ Sifatga baho bering (1-5):", reply_markup=ik(
         [("⭐ 1", "rvstar_1"), ("⭐ 2", "rvstar_2"), ("⭐ 3", "rvstar_3"), ("⭐ 4", "rvstar_4"), ("⭐ 5", "rvstar_5")]))
     await call.answer()
+    
+    # 🔔 YANGILIK: Mijoz buyurtmani olganini adminga darhol xabar qilish
+    adms = await qall("SELECT tg_id FROM admins WHERE role='admin' AND is_active=1")
+    for a in adms:
+        try: await bot.send_message(a['tg_id'], f"✅ <b>Mijoz tasdiqladi!</b>\nBuyurtma #{oid} muvaffaqiyatli qabul qilindi.")
+        except: pass
 
 @router.callback_query(F.data.startswith("rvstar_"))
 async def urev_star(call: CallbackQuery, state: FSMContext):
@@ -544,6 +551,12 @@ async def urev_comment(msg: Message, state: FSMContext):
     await exe("INSERT INTO reviews(user_id, order_id, product_id, rating, comment) VALUES(?,?,0,?,?)", (msg.from_user.id, oid, rating, comment))
     await state.clear()
     await msg.answer("Rahmat, sharhingiz qabul qilindi! 🙏", reply_markup=await main_kb(msg.from_user.id))
+    
+    # 🔔 YANGILIK: Adminga to'liq sharhni yuborish
+    adms = await qall("SELECT tg_id FROM admins WHERE role='admin' AND is_active=1")
+    for a in adms:
+        try: await bot.send_message(a['tg_id'], f"⭐️ <b>Yangi sharh! (Buyurtma #{oid})</b>\n\nBahosi: {rating} yulduz ⭐️\n💬 Fikr: <i>{comment}</i>")
+        except: pass
 
 @router.callback_query(F.data == "rv_skip")
 async def urev_skip(call: CallbackQuery, state: FSMContext):
@@ -552,7 +565,12 @@ async def urev_skip(call: CallbackQuery, state: FSMContext):
     await state.clear()
     await call.message.edit_text("Rahmat! 🙏")
     await call.answer()
-
+    
+    # 🔔 YANGILIK: Adminga sharhni yuborish (matnsiz)
+    adms = await qall("SELECT tg_id FROM admins WHERE role='admin' AND is_active=1")
+    for a in adms:
+        try: await bot.send_message(a['tg_id'], f"⭐️ <b>Yangi sharh! (Buyurtma #{oid})</b>\n\nBahosi: {rating} yulduz ⭐️\n💬 Fikr: (Yozib qoldirmadi)")
+        except: pass
 # ──────────────────────────────────────────
 # 🛠 6. KURYER VA ADMIN CRUD
 # ──────────────────────────────────────────
