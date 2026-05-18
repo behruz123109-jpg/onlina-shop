@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uzum Market Web Katalog</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="header">🛍 Uzum Market</div>
+    <div class="top-bar">
+        <input id="search" type="search" placeholder="Mahsulotlarni qidiring..." oninput="searchProducts()" />
+        <button class="btn small" onclick="showOrderForm()">🛒 Savat</button>
+    </div>
+
+    <div class="categories" id="categories"></div>
+
+    <div class="content">
+        <div class="product-list" id="products">
+            <div class="loader">⏳ Mahsulotlar bazadan yuklanmoqda...</div>
+        </div>
+        <div class="cart-box" id="cart"></div>
+    </div>
+
+    <script src="./script.js"></script>
+</body>
+</html>
