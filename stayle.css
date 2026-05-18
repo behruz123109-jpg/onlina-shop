@@ -1,0 +1,213 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--tg-theme-bg-color, #eff2f7);
+    color: var(--tg-theme-text-color, #111);
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    text-align: center;
+    padding: 18px 12px;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--tg-theme-button-color, #5300d6);
+    background: var(--tg-theme-secondary-bg-color, #ffffff);
+    border-radius: 0 0 18px 18px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.top-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 14px 12px;
+    flex-wrap: wrap;
+    background: #ffffff;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.top-bar input {
+    flex: 1;
+    min-width: 220px;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 15px;
+}
+
+.top-bar .btn.small {
+    width: auto;
+    padding: 12px 18px;
+}
+
+.categories {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 14px 12px;
+    background: #ffffff;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.category-pill {
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(83,0,214,0.18);
+    background: rgba(83,0,214,0.08);
+    color: #5400d6;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.category-pill.active {
+    background: #5300d6;
+    color: #fff;
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 14px;
+    padding: 14px 12px 24px;
+}
+
+.product-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.product-card {
+    background-color: #ffffff;
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.product-card h3 {
+    font-size: 16px;
+    margin: 0;
+}
+
+.product-card p {
+    margin: 0;
+    color: #555;
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+.price {
+    font-size: 16px;
+    font-weight: 800;
+    color: #1d7a2e;
+}
+
+.product-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    background-color: var(--tg-theme-button-color, #5300d6);
+    color: var(--tg-theme-button-text-color, #fff);
+    border: none;
+    padding: 12px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.btn:hover {
+    opacity: 0.95;
+}
+
+.cart-box {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.06);
+    min-height: 260px;
+}
+
+.cart-box h3 {
+    margin-top: 0;
+    font-size: 18px;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+    align-items: center;
+}
+
+.small-btn {
+    padding: 8px 10px;
+    background: #ff4d4f;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.cart-total {
+    font-weight: 800;
+    margin: 16px 0 8px;
+    font-size: 16px;
+}
+
+.order-form {
+    display: grid;
+    gap: 12px;
+}
+
+.order-form label {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.order-form input,
+.order-form select,
+.order-form textarea {
+    width: 100%;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 14px;
+}
+
+.order-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.info-box {
+    padding: 14px;
+    border-radius: 16px;
+    background: #f7f4ff;
+    border: 1px solid rgba(83,0,214,0.12);
+    color: #3e1c9d;
+    margin-bottom: 14px;
+}
+
+@media(max-width: 940px) {
+    .content { grid-template-columns: 1fr; }
+    .product-list { grid-template-columns: 1fr; }
+}
+
+@media(max-width: 600px) {
+    .top-bar { padding: 12px; }
+    .top-bar input { width: 100%; }
+    .categories { padding: 12px; }
+}
+
